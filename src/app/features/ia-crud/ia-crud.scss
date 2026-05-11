@@ -1,0 +1,122 @@
+:host {
+  display: block;
+  background-color: #f1f5f9;
+  min-height: 100vh;
+}
+
+.crud-container {
+  display: flex;
+  gap: 30px;
+  padding: 40px;
+  max-width: 1400px;
+  margin: 0 auto;
+  align-items: flex-start; 
+
+  @media (max-width: 960px) { 
+    flex-direction: column; 
+    padding: 20px;
+  }
+}
+
+/* --- PANEL IZQUIERDO (CONTROLES) --- */
+.control-section {
+  flex: 1;
+  background: white;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  min-width: 320px;
+  
+  h2 { 
+    display: flex; align-items: center; gap: 12px; margin-top: 0; margin-bottom: 5px;
+    color: #1e293b; font-size: 1.5rem; font-weight: 600;
+  }
+
+  .subtitle {
+    color: #64748b;
+    font-size: 0.95rem;
+    margin-bottom: 25px;
+  }
+}
+
+/* Tarjetas interactivas de las APIs */
+.action-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.api-card {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 20px;
+  border-radius: 10px;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &.elevenlabs {
+    background-color: #eff6ff;
+    color: #1e3a8a;
+    .card-icon { background: #dbeafe; color: #2563eb; }
+    &:hover { border-color: #bfdbfe; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15); }
+  }
+
+  &.zerobounce {
+    background-color: #f0fdf4;
+    color: #14532d;
+    .card-icon { background: #dcfce7; color: #16a34a; }
+    &:hover { border-color: #bbf7d0; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(22, 163, 74, 0.15); }
+  }
+
+  .card-icon {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 50px;
+    height: 50px;
+    border-radius: 8px;
+  }
+
+  .card-info {
+    h3 { margin: 0 0 4px 0; font-size: 1.1rem; }
+    span { font-size: 0.85rem; opacity: 0.8; }
+  }
+}
+
+/* --- PANEL DERECHO (TABLA) --- */
+.table-section {
+  flex: 2;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  overflow-x: auto;
+  padding: 10px;
+  
+  table { width: 100%; }
+  
+  .truncate { 
+    max-width: 250px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #475569;
+  }
+
+  .badge {
+    padding: 6px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase;
+    &.blue { background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; }
+    &.green { background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; }
+  }
+
+  .action-buttons { display: flex; gap: 4px; align-items: center; }
+}
+
+/* --- ESTILOS INTERNOS DE LOS MODALES --- */
+.modal-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 15px;
+
+  .w-100 { width: 100%; }
+  .row-fields { display: flex; gap: 15px; }
+  .half-width { width: 50%; }
+}
