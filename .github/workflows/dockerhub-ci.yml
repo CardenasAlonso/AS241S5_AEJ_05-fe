@@ -40,7 +40,7 @@ jobs:
           dockerfile: Dockerfile
           push: true
           tags: |
-            ${{ secrets.DOCKERHUB_USERNAME_HANCEL }}/as241s5_aej_05-be:latest
-            ${{ secrets.DOCKERHUB_USERNAME_HANCEL }}/as241s5_aej_05-be:${{ github.sha }}
+            ${{ secrets.DOCKERHUB_USERNAME_HANCEL }}/as241s5_aej_05-fe:latest
+            ${{ secrets.DOCKERHUB_USERNAME_HANCEL }}/as241s5_aej_05-fe:${{ github.sha }}
 
 # Comentario para ejecutar el Pipeline
