@@ -1,6 +1,6 @@
-import { Component, OnInit, inject, ViewChild, TemplateRef, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, inject, viewChild, TemplateRef, signal, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { MatTableModule } from '@angular/material/table';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
@@ -27,19 +27,25 @@ export class IaCrudComponent implements OnInit {
   private iaService = inject(IaResponseService);
   private fb = inject(FormBuilder);
   private dialog = inject(MatDialog);
-  private cdr = inject(ChangeDetectorRef);
 
-  responses: ApiResponse[] = [];
+  // Estado manejado con Signals nativos (Angular 21)
+  responses = signal<ApiResponse[]>([]);
+  editingId = signal<string | null>(null);
   displayedColumns: string[] = ['apiName', 'prompt', 'timestamp', 'acciones'];
   
-  // Dos formularios independientes
-  elevenLabsForm: FormGroup;
-  zeroBounceForm: FormGroup;
-  editingId: string | null = null;
+  elevenLabsForm = this.fb.nonNullable.group({
+    prompt: ['', Validators.required],
+    durationSeconds: [5, [Validators.required, Validators.min(1)]],
+    promptInfluence: [0.5, [Validators.required, Validators.min(0), Validators.max(1)]]
+  });
 
-  // Referencias a los modales en el HTML
-  @ViewChild('elevenLabsModal') elevenLabsModal!: TemplateRef<any>;
-  @ViewChild('zeroBounceModal') zeroBounceModal!: TemplateRef<any>;
+  zeroBounceForm = this.fb.nonNullable.group({
+    prompt: ['', [Validators.required, Validators.email]]
+  });
+
+  // Queries basadas en Signals en vez de @ViewChild heredado
+  elevenLabsModal = viewChild.required<TemplateRef<any>>('elevenLabsModal');
+  zeroBounceModal = viewChild.required<TemplateRef<any>>('zeroBounceModal');
 
   // Iconos
   readonly Play = Play;
@@ -49,42 +55,27 @@ export class IaCrudComponent implements OnInit {
   readonly Mic = Mic;
   readonly Mail = Mail;
 
-  constructor() {
-    // Formulario para Audio
-    this.elevenLabsForm = this.fb.group({
-      prompt: ['', Validators.required],
-      durationSeconds: [5, [Validators.required, Validators.min(1)]],
-      promptInfluence: [0.5, [Validators.required, Validators.min(0), Validators.max(1)]]
-    });
-
-    // Formulario para Email (ZeroBounce no necesita duración ni influencia)
-    this.zeroBounceForm = this.fb.group({
-      prompt: ['', [Validators.required, Validators.email]]
-    });
-  }
-
   ngOnInit() {
     this.loadData();
   }
 
   loadData() {
     this.iaService.getResponses().subscribe(data => {
-      this.responses = data;
-      this.cdr.detectChanges();
+      this.responses.set(data);
     });
   }
 
   // --- Funciones para abrir Modales ---
   openElevenLabsDialog() {
-    this.editingId = null;
+    this.editingId.set(null);
     this.elevenLabsForm.reset({ durationSeconds: 5, promptInfluence: 0.5 });
-    this.dialog.open(this.elevenLabsModal, { width: '500px' });
+    this.dialog.open(this.elevenLabsModal(), { width: '500px' });
   }
 
   openZeroBounceDialog() {
-    this.editingId = null;
+    this.editingId.set(null);
     this.zeroBounceForm.reset();
-    this.dialog.open(this.zeroBounceModal, { width: '400px' });
+    this.dialog.open(this.zeroBounceModal(), { width: '400px' });
   }
 
   // --- Procesar Formularios ---
@@ -93,9 +84,9 @@ export class IaCrudComponent implements OnInit {
     this.dialog.closeAll();
     
     const soundReq: SoundRequest = {
-      prompt: this.elevenLabsForm.value.prompt,
-      durationSeconds: this.elevenLabsForm.value.durationSeconds,
-      promptInfluence: this.elevenLabsForm.value.promptInfluence
+      prompt: this.elevenLabsForm.getRawValue().prompt,
+      durationSeconds: this.elevenLabsForm.getRawValue().durationSeconds,
+      promptInfluence: this.elevenLabsForm.getRawValue().promptInfluence
     };
     
     this.processRequest(soundReq, 'ElevenLabs');
@@ -106,7 +97,7 @@ export class IaCrudComponent implements OnInit {
     this.dialog.closeAll();
 
     const request = {
-      prompt: this.zeroBounceForm.value.prompt,
+      prompt: this.zeroBounceForm.getRawValue().prompt,
       durationSeconds: 0, 
       promptInfluence: 0 
     };
@@ -123,8 +114,10 @@ export class IaCrudComponent implements OnInit {
       didOpen: () => Swal.showLoading()
     });
 
-    if (this.editingId) {
-      this.iaService.updateRequest(this.editingId, reqData).subscribe({
+    const currentId = this.editingId();
+
+    if (currentId) {
+      this.iaService.updateRequest(currentId, reqData).subscribe({
         next: () => this.onSuccess('Consulta actualizada correctamente'),
         error: () => Swal.fire('Error', 'Fallo al actualizar', 'error')
       });
@@ -167,19 +160,19 @@ export class IaCrudComponent implements OnInit {
   }
 
   editResponse(response: ApiResponse) {
-    this.editingId = response.id!;
+    this.editingId.set(response.id!);
     if (response.apiName === 'ElevenLabs') {
       this.elevenLabsForm.patchValue({
         prompt: response.requestData,
         durationSeconds: 5,
         promptInfluence: 0.5
       });
-      this.dialog.open(this.elevenLabsModal, { width: '500px' });
+      this.dialog.open(this.elevenLabsModal(), { width: '500px' });
     } else {
       this.zeroBounceForm.patchValue({
         prompt: response.requestData
       });
-      this.dialog.open(this.zeroBounceModal, { width: '400px' });
+      this.dialog.open(this.zeroBounceModal(), { width: '400px' });
     }
   }
 }

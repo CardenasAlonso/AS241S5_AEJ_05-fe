@@ -5,31 +5,35 @@
 }
 
 .crud-container {
-  display: flex;
+  display: grid;
+  grid-template-columns: 350px 1fr;
   gap: 30px;
   padding: 40px;
   max-width: 1400px;
   margin: 0 auto;
-  align-items: flex-start; 
+  align-items: flex-start;
 
-  @media (max-width: 960px) { 
-    flex-direction: column; 
+  @media (max-width: 1024px) {
+    grid-template-columns: 1fr;
     padding: 20px;
   }
 }
 
 /* --- PANEL IZQUIERDO (CONTROLES) --- */
 .control-section {
-  flex: 1;
-  background: white;
+  background: #ffffff;
   padding: 30px;
   border-radius: 12px;
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  min-width: 320px;
   
-  h2 { 
-    display: flex; align-items: center; gap: 12px; margin-top: 0; margin-bottom: 5px;
-    color: #1e293b; font-size: 1.5rem; font-weight: 600;
+  h2 {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 0 0 5px 0;
+    color: #1e293b;
+    font-size: 1.5rem;
+    font-weight: 600;
   }
 
   .subtitle {
@@ -39,7 +43,6 @@
   }
 }
 
-/* Tarjetas interactivas de las APIs */
 .action-cards {
   display: flex;
   flex-direction: column;
@@ -54,7 +57,7 @@
   border-radius: 10px;
   border: 2px solid transparent;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
 
   &.elevenlabs {
     background-color: #eff6ff;
@@ -87,36 +90,56 @@
 
 /* --- PANEL DERECHO (TABLA) --- */
 .table-section {
-  flex: 2;
-  background: white;
+  background: #ffffff;
   border-radius: 12px;
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-  overflow-x: auto;
-  padding: 10px;
+  overflow: hidden; /* Evita que los bordes redondeados se corten */
+  padding: 15px;
   
-  table { width: 100%; }
+  .w-100 { width: 100%; }
   
-  .truncate { 
-    max-width: 250px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #475569;
+  .truncate {
+    max-width: 250px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: #475569;
   }
 
   .badge {
-    padding: 6px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase;
+    display: inline-block;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    
     &.blue { background: #eff6ff; color: #2563eb; border: 1px solid #bfdbfe; }
     &.green { background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; }
   }
 
-  .action-buttons { display: flex; gap: 4px; align-items: center; }
+  .action-buttons {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
 }
 
-/* --- ESTILOS INTERNOS DE LOS MODALES --- */
-.modal-form {
+mat-dialog-content {
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  margin-top: 15px;
+  gap: 16px;
+  padding-top: 12px !important;
 
   .w-100 { width: 100%; }
-  .row-fields { display: flex; gap: 15px; }
-  .half-width { width: 50%; }
+  
+  .row-fields {
+    display: flex;
+    gap: 15px;
+    
+    @media (max-width: 480px) {
+      flex-direction: column;
+      gap: 0;
+    }
+  }
 }

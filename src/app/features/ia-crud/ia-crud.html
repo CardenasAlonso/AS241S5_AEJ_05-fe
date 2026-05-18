@@ -27,12 +27,14 @@
   </div>
 
   <div class="table-section">
-    <table mat-table [dataSource]="responses" class="w-100">
+    <!-- Se pasa la ejecución del signal responses() directamente al dataSource -->
+    <table mat-table [dataSource]="responses()" class="w-100">
 
       <ng-container matColumnDef="apiName">
         <th mat-header-cell *matHeaderCellDef> API Usada </th>
         <td mat-cell *matCellDef="let element">
-          <span class="badge" [ngClass]="element.apiName === 'ElevenLabs' ? 'blue' : 'green'">
+          <!-- Control Flow moderno sustituyendo ngClass estructural heredado -->
+          <span class="badge" [class.blue]="element.apiName === 'ElevenLabs'" [class.green]="element.apiName !== 'ElevenLabs'">
             {{ element.apiName }}
           </span>
         </td>
@@ -56,9 +58,12 @@
         <th mat-header-cell *matHeaderCellDef> Acciones </th>
         <td mat-cell *matCellDef="let element">
           <div class="action-buttons">
-            <button mat-icon-button color="accent" (click)="playAudio(element)" *ngIf="element.apiName === 'ElevenLabs'" title="Reproducir Audio">
-              <lucide-icon [img]="Play" size="20"></lucide-icon>
-            </button>
+            <!-- Nuevo Bloque @if nativo de Angular 21 -->
+            @if (element.apiName === 'ElevenLabs') {
+              <button mat-icon-button color="accent" (click)="playAudio(element)" title="Reproducir Audio">
+                <lucide-icon [img]="Play" size="20"></lucide-icon>
+              </button>
+            }
             <button mat-icon-button color="primary" (click)="editResponse(element)" title="Editar">
               <lucide-icon [img]="Edit" size="20"></lucide-icon>
             </button>
@@ -71,61 +76,43 @@
 
       <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
       <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-
-      <tr class="mat-row" *matNoDataRow>
-        <td class="mat-cell" colspan="4" style="text-align: center; padding: 30px; color: #64748b;">
-          No hay consultas registradas aún. Selecciona un motor IA para comenzar.
-        </td>
-      </tr>
-      
     </table>
   </div>
 </div>
 
+<!-- Estructuras de plantillas para tus diálogos (Modales) -->
 <ng-template #elevenLabsModal>
-  <h2 mat-dialog-title>Configuración ElevenLabs</h2>
-  <mat-dialog-content>
-    <form [formGroup]="elevenLabsForm" class="modal-form">
-      <mat-form-field appearance="outline" class="w-100">
-        <mat-label>Texto a convertir en Audio</mat-label>
-        <textarea matInput formControlName="prompt" rows="4" placeholder="Escribe tu texto épico aquí..."></textarea>
-      </mat-form-field>
-
-      <div class="row-fields">
-        <mat-form-field appearance="outline" class="half-width">
-          <mat-label>Duración (Seg.)</mat-label>
-          <input matInput type="number" formControlName="durationSeconds">
-        </mat-form-field>
-
-        <mat-form-field appearance="outline" class="half-width">
-          <mat-label>Influencia (0.0 - 1.0)</mat-label>
-          <input matInput type="number" formControlName="promptInfluence" step="0.1">
-        </mat-form-field>
-      </div>
-    </form>
+  <h2 mat-dialog-title>{{ editingId() ? 'Editar' : 'Nueva'}} Solicitud ElevenLabs</h2>
+  <mat-dialog-content [formGroup]="elevenLabsForm">
+    <mat-form-field appearance="fill" class="w-100">
+      <mat-label>Prompt de Audio</mat-label>
+      <input matInput formControlName="prompt" placeholder="Escribe el texto a generar">
+    </mat-form-field>
+    <mat-form-field appearance="fill" class="w-100">
+      <mat-label>Duración (Segundos)</mat-label>
+      <input matInput type="number" formControlName="durationSeconds">
+    </mat-form-field>
+    <mat-form-field appearance="fill" class="w-100">
+      <mat-label>Influencia del Prompt</mat-label>
+      <input matInput type="number" step="0.1" formControlName="promptInfluence">
+    </mat-form-field>
   </mat-dialog-content>
   <mat-dialog-actions align="end">
     <button mat-button mat-dialog-close>Cancelar</button>
-    <button mat-raised-button color="primary" [disabled]="elevenLabsForm.invalid" (click)="onSubmitElevenLabs()">
-      {{ editingId ? 'Actualizar' : 'Generar Audio' }}
-    </button>
+    <button mat-raised-button color="primary" [disabled]="elevenLabsForm.invalid" (click)="onSubmitElevenLabs()">Procesar</button>
   </mat-dialog-actions>
 </ng-template>
 
 <ng-template #zeroBounceModal>
-  <h2 mat-dialog-title>Validación ZeroBounce</h2>
-  <mat-dialog-content>
-    <form [formGroup]="zeroBounceForm" class="modal-form">
-      <mat-form-field appearance="outline" class="w-100">
-        <mat-label>Correo Electrónico a Validar</mat-label>
-        <input matInput formControlName="prompt" placeholder="ejemplo@correo.com">
-      </mat-form-field>
-    </form>
+  <h2 mat-dialog-title>{{ editingId() ? 'Editar' : 'Nueva'}} Validación ZeroBounce</h2>
+  <mat-dialog-content [formGroup]="zeroBounceForm">
+    <mat-form-field appearance="fill" class="w-100">
+      <mat-label>Correo Electrónico</mat-label>
+      <input matInput formControlName="prompt" placeholder="ejemplo@correo.com" type="email">
+    </mat-form-field>
   </mat-dialog-content>
   <mat-dialog-actions align="end">
     <button mat-button mat-dialog-close>Cancelar</button>
-    <button mat-raised-button color="primary" [disabled]="zeroBounceForm.invalid" (click)="onSubmitZeroBounce()">
-      {{ editingId ? 'Actualizar' : 'Validar Email' }}
-    </button>
+    <button mat-raised-button color="primary" [disabled]="zeroBounceForm.invalid" (click)="onSubmitZeroBounce()">Validar</button>
   </mat-dialog-actions>
 </ng-template>
