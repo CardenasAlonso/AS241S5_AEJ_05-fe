@@ -3,10 +3,12 @@ name: Docker Hub
 on:
   push:
     branches:
+      - main
       - develop
       - webflux-nosql # puedes añadir más ramas
   pull_request:
     branches:
+      - main
       - develop
       - webflux-nosql # puedes añadir más ramas
   schedule:

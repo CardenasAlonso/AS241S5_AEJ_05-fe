@@ -22,7 +22,7 @@ LABEL maintainer="your-email@example.com"
 LABEL version="1.0"
 
 # Reemplaza 'as241-s5-aej-05-fe' por el valor exacto de la propiedad "name" de tu package.json
-COPY --from=build /app/dist/as241-s5-aej-05-fe/browser /usr/share/nginx/html/
+COPY --from=build /app/dist/*/browser/ /usr/share/nginx/html/
 
 # Copiamos configuración optimizada de Nginx
 COPY nginx.conf /etc/nginx/conf.d/default.conf
