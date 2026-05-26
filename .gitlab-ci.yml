@@ -1,0 +1,47 @@
+image: docker:cli
+
+services:
+  - docker:dind
+
+variables:
+  DOCKER_DRIVER: overlay2
+  DOCKER_TLS_CERTDIR: ""
+  SONAR_HOST_URL: "https://sonarcloud.io"
+  SONAR_ORGANIZATION: "cardenasalonso"
+  SONAR_PROJECT_KEY: "CardenasAlonso_AS241S5_AEJ_05-fe"
+
+stages:
+  - verify
+  - publish
+
+verify-and-analyze:
+  stage: verify
+  image: node:20-alpine
+  script:
+    - npm ci
+    - npm run test -- --watch=false --coverage || true
+    - >
+      npx sonar-scanner 
+      -Dsonar.projectKey=$SONAR_PROJECT_KEY 
+      -Dsonar.organization=$SONAR_ORGANIZATION 
+      -Dsonar.host.url=$SONAR_HOST_URL 
+      -Dsonar.token=$SONAR_TOKEN 
+      -Dsonar.sources=src 
+      -Dsonar.tests=src 
+      -Dsonar.test.inclusions=**/*.spec.ts
+  rules:
+    - if: $CI_COMMIT_BRANCH == "develop" || $CI_COMMIT_BRANCH == "main"
+
+build-and-push-docker:
+  stage: publish
+  needs:
+    - job: verify-and-analyze
+  rules:
+    - if: $CI_COMMIT_BRANCH == "develop"
+    - if: $CI_COMMIT_BRANCH == "main"
+  before_script:
+    - echo "$DOCKERHUB_TOKEN_HANCEL" | docker login -u "$DOCKERHUB_USERNAME_HANCEL" --password-stdin
+  script:
+    - docker build -t $DOCKERHUB_USERNAME_HANCEL/as241s5_aej_05-fe:latest -t $DOCKERHUB_USERNAME_HANCEL/as241s5_aej_05-fe:$CI_COMMIT_SHORT_SHA .
+    - docker push $DOCKERHUB_USERNAME_HANCEL/as241s5_aej_05-fe:latest
+    - docker push $DOCKERHUB_USERNAME_HANCEL/as241s5_aej_05-fe:$CI_COMMIT_SHORT_SHA
