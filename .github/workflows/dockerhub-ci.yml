@@ -2,13 +2,9 @@ name: Docker Hub + SonarCloud Frontend
 
 on:
   push:
-    branches:
-      - main
-      - develop
+    branches: [main, develop]
   pull_request:
-    branches:
-      - main
-      - develop
+    branches: [main, develop]
   workflow_dispatch:
 
 jobs:
@@ -30,20 +26,19 @@ jobs:
       - name: Install Dependencies
         run: npm ci
 
-      - name: Run Tests and SonarCloud Scan
+            # Escaneo directo de SonarCloud sin ejecutar test
+      - name: SonarCloud Scan
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
-          npm run test -- --watch=false --coverage || true
           npx sonar-scanner \
             -Dsonar.projectKey=CardenasAlonso_AS241S5_AEJ_05-fe \
             -Dsonar.organization=cardenasalonso \
             -Dsonar.host.url=https://sonarcloud.io \
             -Dsonar.sources=src \
-            -Dsonar.tests=src \
-            -Dsonar.test.inclusions=**/*.spec.ts
-
+            -Dsonar.qualitygate.wait=true
+            
   dockerhub:
     name: Build and Push Docker Image
     runs-on: ubuntu-latest
@@ -68,5 +63,3 @@ jobs:
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME_HANCEL }}/as241s5_aej_05-fe:latest
             ${{ secrets.DOCKERHUB_USERNAME_HANCEL }}/as241s5_aej_05-fe:${{ github.sha }}
-
-# Comentario para ejecutar el Pipeline

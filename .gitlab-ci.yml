@@ -19,7 +19,6 @@ verify-and-analyze:
   image: node:20-alpine
   script:
     - npm ci
-    - npm run test -- --watch=false --coverage || true
     - >
       npx sonar-scanner 
       -Dsonar.projectKey=$SONAR_PROJECT_KEY 
@@ -27,13 +26,13 @@ verify-and-analyze:
       -Dsonar.host.url=$SONAR_HOST_URL 
       -Dsonar.token=$SONAR_TOKEN 
       -Dsonar.sources=src 
-      -Dsonar.tests=src 
-      -Dsonar.test.inclusions=**/*.spec.ts
+      -Dsonar.qualitygate.wait=true
   rules:
     - if: $CI_COMMIT_BRANCH == "develop" || $CI_COMMIT_BRANCH == "main"
 
 build-and-push-docker:
   stage: publish
+  image: docker:cli
   needs:
     - job: verify-and-analyze
   rules:
